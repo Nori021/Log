@@ -422,27 +422,30 @@ tr:hover .ntd-del-btn{ opacity:1; }
 .ntd-tw-cat-sel{ background:var(--bg2); border:1px solid var(--bd); border-radius:3px; font-family:var(--sans); font-size:11px; color:var(--text); padding:2px 4px; outline:none; cursor:pointer; flex-shrink:0; }
 
 /* col header */
-.ntd-col-hdr{ padding:8px 10px 6px; background:var(--bg); flex-shrink:0; user-select:none; border-bottom:none; }
+.ntd-col-hdr{ padding:5px 6px 4px; background:var(--bg); flex-shrink:0; user-select:none; border-bottom:none; }
 .ntd-col-day{ font-size:11px; font-weight:600; letter-spacing:.5px; text-transform:uppercase; color:var(--text2); margin-bottom:0; }
 .ntd-col-date{ display:inline-block; font-size:11px; font-weight:400; color:var(--text3); font-family:var(--mono); margin-left:4px; }
-.ntd-col.is-today .ntd-col-day{ color:var(--blue); }
+.ntd-col.is-today .ntd-col-day{ color:var(--blue); font-weight:700; }
 .ntd-col.is-today .ntd-col-date{ color:var(--blue); }
-.ntd-col.is-today .ntd-col-hdr{ background:var(--blue-bg); border-bottom-color:rgba(35,131,226,.2); }
-.ntd-col.is-fri .ntd-col-day{ color:var(--green); opacity:.8; }
-.ntd-col.is-fri .ntd-col-hdr{ background:#f5fbf8; }
+.ntd-col.is-today .ntd-col-hdr{ background:var(--blue-bg); }
+/* 祝日 */
+.ntd-col.is-holiday .ntd-col-day{ color:var(--red); }
+.ntd-col.is-holiday .ntd-col-date{ color:var(--red); }
+.ntd-col.is-holiday .ntd-col-hdr{ background:var(--red-bg); }
+.ntd-col.is-today.is-holiday .ntd-col-hdr{ background:#fee2e2; }
 
 /* entire column content scrolls */
-.ntd-col-body{ padding:8px 8px 20px; }
+.ntd-col-body{ padding:4px 4px 16px; }
 
 .ntd-col-body.drag-over{ background:var(--blue-bg); }
 
 /* callout / event block — 横並び: 時間(左) | タイトル(右) */
 .ntd-callout{
   display:flex; flex-direction:row; align-items:stretch; gap:0;
-  padding:0; border-radius:3px; margin-bottom:2px;
+  padding:0; border-radius:3px; margin-bottom:1px;
   cursor:pointer; position:relative;
   border:none; min-width:0; width:100%;
-  transition:filter .1s;
+  transition:filter .1s; overflow:hidden;
 }
 .ntd-callout:hover{ filter:brightness(.95); }
 .ntd-callout.cal-1{ background:#deeeff; }
@@ -454,35 +457,32 @@ tr:hover .ntd-del-btn{ opacity:1; }
 .ntd-callout.cal-manual{ background:#ece8f8; }
 .ntd-callout.cal-manual .ntd-callout-time{ color:#6a3d9a; background:#d8d0f5; }
 .ntd-callout.cal-manual .ntd-callout-text{ color:#3a1f60; }
-/* 時間（左側）: コンパクト */
+/* 時間（左側）*/
 .ntd-callout-time{
   font-family:var(--mono); font-size:9px; font-weight:700;
-  padding:3px 4px; display:flex; align-items:center; justify-content:center;
+  padding:2px 4px; display:flex; align-items:center; justify-content:center;
   flex-shrink:0; white-space:nowrap; letter-spacing:0; line-height:1.2; text-align:center;
-  min-width:0;
 }
-/* タイトル（右側） */
+/* タイトル（右側）: ✕ぶんの右余白を確保 */
 .ntd-callout-text{
-  font-size:11px; line-height:1.3; padding:3px 5px;
+  font-size:11px; line-height:1.3; padding:2px 18px 2px 5px;
   flex:1; min-width:0;
   white-space:normal !important;
-  word-break:break-all;
-  overflow-wrap:anywhere;
-  font-weight:500;
-  overflow:hidden;
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
+  word-break:break-all; overflow-wrap:anywhere;
+  font-weight:500; overflow:hidden;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
 }
+/* ✕ボタン：右上絶対配置 */
 .ntd-callout-del{
-  background:none; border:none; color:rgba(0,0,0,.25); font-size:9px;
-  cursor:pointer; opacity:0; padding:2px 4px; flex-shrink:0;
-  display:flex; align-items:flex-start; transition:opacity .1s;
+  position:absolute; top:1px; right:1px;
+  background:none; border:none; color:rgba(0,0,0,.2); font-size:9px;
+  cursor:pointer; opacity:0; padding:1px 3px; border-radius:2px;
+  transition:opacity .1s;
 }
 .ntd-callout:hover .ntd-callout-del{ opacity:1; }
-.ntd-callout-del:hover{ color:var(--red); background:rgba(255,255,255,.5); }
+.ntd-callout-del:hover{ color:var(--red); background:rgba(255,255,255,.6); }
 
-.ntd-add-event-btn{ display:flex; align-items:center; gap:4px; padding:2px 2px; cursor:pointer; color:var(--text3); font-size:11px; font-family:var(--sans); transition:color .1s; border:none; background:transparent; width:100%; margin-bottom:4px; }
+.ntd-add-event-btn{ display:flex; align-items:center; gap:3px; padding:1px 0; cursor:pointer; color:var(--text3); font-size:10px; font-family:var(--sans); transition:color .1s; border:none; background:transparent; width:100%; margin-bottom:2px; margin-top:1px; }
 .ntd-add-event-btn:hover{ color:var(--text2); }
 
 /* tasks — flat Notion-style checklist */
@@ -679,16 +679,7 @@ tr:hover .ntd-del-btn{ opacity:1; }
 .ntd-confirm-ok{ padding:8px 20px; border-radius:6px; border:none; background:var(--orange); color:#fff; font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer; }
 .ntd-confirm-ok:hover{ opacity:.88; }
 
-/* ── フロントローディング: 月火は強調 ── */
-.ntd-col.is-front .ntd-col-hdr{ background:#f0f6ff; border-bottom-color:rgba(35,131,226,.15); }
-.ntd-col.is-front .ntd-col-day{ color:var(--blue); font-weight:700; }
-.ntd-col.is-fri .ntd-col-hdr{ background:#f5fbf8; }
-.ntd-col.is-fri .ntd-col-day{ color:var(--green); opacity:.8; }
-.ntd-fri-label{
-  font-size:9px; color:var(--green); background:var(--green-bg);
-  padding:1px 6px; border-radius:10px; margin-left:4px;
-  font-weight:600; letter-spacing:.3px; opacity:.8;
-}
+/* フロントローディング・fri 色統一済み（削除） */
 
 /* ── コールアウト: 強化版 ── */
 .ntd-callout{
@@ -1763,10 +1754,11 @@ function ntRenderBoard(w){
   NT_DAYS.forEach((dayName,di)=>{
     const col=w.cols.find(c=>c.di===di)||{di,callouts:[],tasks:[]};
     const colDate=new Date(mon); colDate.setDate(mon.getDate()+di);
-    const isToday=ds(colDate)===today, isFri=di===4;
+    const isToday = ds(colDate)===today;
+    const dateStr = ds(colDate);
+    const isHoliday = ntHolidays && ntHolidays[dateStr];
     const colEl=document.createElement('div');
-    const isFront = (di===0||di===1) && !isToday; // 月・火
-    colEl.className='ntd-col'+(isToday?' is-today':'')+(isFri?' is-fri':'')+(isFront?' is-front':'');
+    colEl.className='ntd-col'+(isToday?' is-today':'')+(isHoliday?' is-holiday':'');
     colEl.dataset.di=di;
 
     // コールアウトを時刻昇順ソート（早い順 = 上）
@@ -1798,12 +1790,13 @@ function ntRenderBoard(w){
     const tasksH=(col.tasks||[]).map(t=>ntTaskHTML(w.id,di,t)).join('');
     const dateSpan = `<span class="ntd-col-date">${di<=4?colDate.getDate():''}</span>`;
 
-    const friLabel = isFri ? '<span class="ntd-fri-label">余白の日</span>' : '';
+    const holidayName = (ntHolidays && ntHolidays[ds(colDate)]) || '';
     const taskCnt = (col.tasks||[]).length;
     const overloadBadge = taskCnt>=8 ? '<span class="ntd-overload-badge">⚠ 多め</span>' : '';
     colEl.innerHTML=`
-      <div class="ntd-col-hdr" style="display:flex;align-items:center;gap:4px;padding:8px 10px 7px">
-        <span class="ntd-col-day">${dayName}</span>${dateSpan}${friLabel}
+      <div class="ntd-col-hdr" style="display:flex;align-items:center;gap:4px;padding:5px 6px 4px">
+        <span class="ntd-col-day">${dayName}</span>${dateSpan}
+        ${holidayName ? `<span style="font-size:9px;color:var(--red);margin-left:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px">${eh(holidayName)}</span>` : ''}
         <span style="flex:1"></span>${overloadBadge}
       </div>
       <div class="ntd-col-body" id="ntcb-${w.id}-${di}"
@@ -2754,6 +2747,32 @@ function ntSetTaskCat(wid, di, tid, catId){
   t.cat = catId || null;
   ntSave();
   ntRenderBoard(r.w);
+}
+
+
+// ── 祝日データ ──
+// Google Calendar の日本の祝日カレンダーから取得 or 内蔵フォールバック
+let ntHolidays = JSON.parse(localStorage.getItem('nt_holidays_cache') || 'null') || {};
+let _holidayFetchedWeek = '';
+
+async function ntFetchHolidays(weekKey){
+  if(_holidayFetchedWeek === weekKey) return;
+  _holidayFetchedWeek = weekKey;
+  try{
+    // GAS経由で日本の祝日カレンダーを取得
+    const res = await gasGet({
+      action: 'getEvents',
+      weekStart: weekKey,
+      calId: 'ja.japanese#holiday@group.v.calendar.google.com'
+    });
+    if(res.ok && res.events){
+      res.events.forEach(ev => {
+        const d = ev.start.substring(0,10);
+        ntHolidays[d] = ev.title;
+      });
+      localStorage.setItem('nt_holidays_cache', JSON.stringify(ntHolidays));
+    }
+  }catch(e){ console.warn('Holiday fetch failed:', e); }
 }
 
 init();
