@@ -1980,13 +1980,32 @@ function ntSetCal2(id){
 
 // 強制再同期（既存の fromCalendar イベントを一旦削除して再取得）
 async function ntForceSyncCal(){
-  const w = ntWeeks.find(x=>x.id===ntCurWeekId); if(!w) return;
-  // fromCalendar フラグのついたコールアウトを削除してから再取得
-  w.cols.forEach(col=>{
-    col.callouts = (col.callouts||[]).filter(c=>!c.fromCalendar);
-  });
-  ntSave();
-  await ntSyncCalendarEvents(w);
+  const btn = document.getElementById('gcal-sync-btn');
+  if(!btn) return;
+  // ローディング状態に変更
+  const origText = btn.textContent;
+  btn.textContent = '⏳ 同期中...';
+  btn.disabled = true;
+  btn.style.opacity = '.6';
+  btn.style.cursor = 'wait';
+
+  const w = ntWeeks.find(x=>x.id===ntCurWeekId);
+  if(w){
+    w.cols.forEach(col=>{
+      col.callouts = (col.callouts||[]).filter(c=>!c.fromCalendar);
+    });
+    ntSave();
+    await ntSyncCalendarEvents(w);
+  }
+
+  // 完了状態
+  btn.textContent = '✅ 同期完了';
+  btn.style.opacity = '1';
+  btn.style.cursor = '';
+  setTimeout(()=>{
+    btn.textContent = origText;
+    btn.disabled = false;
+  }, 2000);
 }
 
 // ── CALLOUT ──
