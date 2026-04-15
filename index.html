@@ -48,8 +48,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 
 /* ── PAGES ── */
 .pages{flex:1;overflow:hidden;position:relative;min-height:0}
-.page{position:absolute;inset:0;display:none;flex-direction:column}
-.page.on{display:flex;flex-direction:column}
+.page{position:absolute;inset:0;display:none}
+.page.on{display:flex}
 
 /* ══════════════════════════════════════
    LOG PAGE — NOTION WHITE
@@ -171,8 +171,8 @@ mark{ background:rgba(223,171,1,.2); color:var(--orange); border-radius:2px; pad
 /* ══════════════════════════════════════
    ARCHIVE PAGE — NOTION WHITE
 ══════════════════════════════════════ */
-#page-archive{ background:var(--bg); }
-.arc-sidebar{ width:240px; flex-shrink:0; display:flex; flex-direction:column; border-right:1px solid var(--bd); background:var(--bg); }
+#page-archive{ background:var(--bg); flex-direction:row; overflow:hidden; }
+.arc-sidebar{ width:240px; flex-shrink:0; display:flex; flex-direction:column; border-right:1px solid var(--bd); background:var(--bg); overflow:hidden; }
 .arc-sidebar-hd{ padding:12px 14px 10px; border-bottom:1px solid var(--bd); }
 .arc-sidebar-ttl{ font-size:11px; font-weight:600; letter-spacing:.5px; text-transform:uppercase; color:var(--text2); margin-bottom:8px; }
 .arc-search-in{ width:100%; background:var(--bg2); border:1px solid var(--bd); border-radius:var(--r); color:var(--text); font-family:var(--sans); font-size:12px; padding:6px 10px; outline:none; transition:border-color .15s; }
@@ -188,7 +188,7 @@ mark{ background:rgba(223,171,1,.2); color:var(--orange); border-radius:2px; pad
 .di-meta{ font-family:var(--mono); font-size:10px; color:var(--text3); }
 .di-badge{ font-family:var(--mono); font-size:10px; padding:2px 7px; border-radius:20px; background:var(--bg3); color:var(--text2); }
 .date-item.sel .di-badge{ background:var(--blue-bg); color:var(--blue); }
-.arc-main{ flex:1; display:flex; flex-direction:column; min-width:0; }
+.arc-main{ flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
 .arc-toolbar{ height:48px; flex-shrink:0; display:flex; align-items:center; padding:0 20px; border-bottom:1px solid var(--bd); background:var(--bg); gap:10px; }
 .arc-title{ font-size:15px; font-weight:600; flex:1; color:var(--text); }
 .arc-count{ font-family:var(--mono); font-size:11px; color:var(--text3); }
@@ -196,7 +196,7 @@ mark{ background:rgba(223,171,1,.2); color:var(--orange); border-radius:2px; pad
 .arc-bsm:hover{ background:var(--bg2); color:var(--text); border-color:var(--bd2); }
 .arc-bsm.p{ background:var(--blue); color:white; border:none; }
 .arc-bsm.p:hover{ background:#1a73cc; }
-.arc-body{ flex:1; display:grid; grid-template-columns:1fr 340px; min-height:0; overflow:hidden; }
+.arc-body{ flex:1; display:grid; grid-template-columns:1fr 340px; min-height:0; overflow:hidden; height:0; }
 .arc-entries{ overflow-y:auto; padding:16px 20px; background:var(--bg); }
 .arc-entries::-webkit-scrollbar{ width:4px; } .arc-entries::-webkit-scrollbar-thumb{ background:var(--bd2); border-radius:2px; }
 .arc-empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:10px; color:var(--text3); text-align:center; }
@@ -1169,7 +1169,7 @@ tr.row-pending:hover td{ opacity:.85; }
 
 
 <!-- ── PAGE: REVIEW ── -->
-<div class="page" id="page-review" style="overflow-y:auto;display:none;flex-direction:column">
+<div class="page" id="page-review" style="display:none;overflow-y:auto;">
   <div style="max-width:860px;width:100%;margin:0 auto;padding:32px 32px 60px">
     <div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px">📊 振り返り</div>
     <div style="font-size:14px;color:var(--text2);margin-bottom:24px">完了タスクの記録</div>
@@ -1361,7 +1361,9 @@ function showPage(p){
   document.querySelectorAll('.page').forEach(el=>{ el.classList.remove('on'); el.style.display='none'; });
   const pg = document.getElementById('page-'+p);
   pg.classList.add('on');
+  // archiveはrow方向
   pg.style.display='flex';
+  pg.style.flexDirection = p==='archive' ? 'row' : 'column';
   document.querySelectorAll('.nbtn').forEach(b=>b.classList.toggle('on', b.getAttribute('onclick')===`showPage('${p}')`));
   if(p==='archive') renderArcSidebar();
   if(p==='todo') ntInit();
