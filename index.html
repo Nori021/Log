@@ -1077,7 +1077,7 @@ tr.row-pending:hover td{ opacity:.85; }
             <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">新しいカテゴリを追加</div>
             <div class="ntd-color-row" id="color-picker-row"></div>
             <div class="ntd-cat-add">
-              <input id="cat-name-inp" placeholder="カテゴリ名（例: 民泊事業）" onkeydown="if(event.key==='Enter')ntAddCat()">
+              <input id="cat-name-inp" placeholder="カテゴリ名（例: 民泊事業）" onkeydown="if(event.key==='Enter'&&!event.isComposing)ntAddCat()">
               <button onclick="ntAddCat()" style="padding:6px 14px;border-radius:4px;border:none;background:var(--blue);color:#fff;font-family:var(--sans);font-size:12px;cursor:pointer;">追加</button>
             </div>
           </div>
@@ -1536,18 +1536,60 @@ function ntInit(){
 
 // ── CATEGORY MASTER ──
 function ntRenderCatMaster(){
-  // color picker
   document.getElementById('color-picker-row').innerHTML = NT_COLORS.map(c=>`<div class="ntd-color-opt${c===ntNewCatColor?' sel':''}" style="background:${c}" onclick="ntPickColor('${c}')"></div>`).join('');
-  // cat list
   const el=document.getElementById('cat-list');
   if(!ntCats.length){ el.innerHTML='<div style="font-size:13px;color:var(--text3);padding:8px 0">カテゴリがありません</div>'; return; }
-  el.innerHTML=`<div style="display:flex;flex-direction:column;gap:6px">` + ntCats.map(c=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px">
+  el.innerHTML=`<div id="cat-sortable" style="display:flex;flex-direction:column;gap:6px">` + ntCats.map(c=>`
+    <div class="cat-sort-item" data-id="${c.id}" draggable="true"
+      style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;cursor:grab;transition:opacity .15s,box-shadow .15s">
+      <span style="color:var(--text3);font-size:14px;cursor:grab;user-select:none">⠿</span>
       <div style="width:14px;height:14px;border-radius:3px;background:${c.color};flex-shrink:0"></div>
       <span style="font-size:13px;flex:1">${eh(c.name)}</span>
       <span style="font-size:11px;font-family:var(--mono);color:var(--text3)">${c.color}</span>
       <button onclick="ntDelCat('${c.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;padding:2px 6px;border-radius:3px;transition:all .1s" onmouseover="this.style.background='var(--red-bg)';this.style.color='var(--red)'" onmouseout="this.style.background='none';this.style.color='var(--text3)'">削除</button>
     </div>`).join('') + '</div>';
+
+  // D&D 並び替えを設定
+  ntInitCatDrag();
+}
+
+function ntInitCatDrag(){
+  const container = document.getElementById('cat-sortable');
+  if(!container) return;
+  let dragEl = null;
+
+  container.querySelectorAll('.cat-sort-item').forEach(item=>{
+    item.addEventListener('dragstart', e=>{
+      dragEl = item;
+      item.style.opacity = '.4';
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', e=>{
+      item.style.opacity = '1';
+      item.style.boxShadow = '';
+      container.querySelectorAll('.cat-sort-item').forEach(i=>i.style.boxShadow='');
+      dragEl = null;
+      // 並び順を ntCats に反映
+      const newOrder = [...container.querySelectorAll('.cat-sort-item')].map(i=>i.dataset.id);
+      ntCats = newOrder.map(id=>ntCats.find(c=>c.id===id)).filter(Boolean);
+      ntSaveCats(); ntRebuildCatSelects();
+    });
+    item.addEventListener('dragover', e=>{
+      e.preventDefault();
+      if(!dragEl || dragEl===item) return;
+      const rect = item.getBoundingClientRect();
+      const mid = rect.top + rect.height/2;
+      container.querySelectorAll('.cat-sort-item').forEach(i=>i.style.boxShadow='');
+      if(e.clientY < mid){
+        item.style.boxShadow = '0 -2px 0 var(--blue)';
+        container.insertBefore(dragEl, item);
+      } else {
+        item.style.boxShadow = '0 2px 0 var(--blue)';
+        container.insertBefore(dragEl, item.nextSibling);
+      }
+    });
+    item.addEventListener('dragleave', ()=>{ item.style.boxShadow=''; });
+  });
 }
 function ntPickColor(c){ ntNewCatColor=c; document.querySelectorAll('.ntd-color-opt').forEach(el=>el.classList.toggle('sel',el.style.background===c||el.style.backgroundColor===c)); document.getElementById('color-picker-row').innerHTML=NT_COLORS.map(cc=>`<div class="ntd-color-opt${cc===ntNewCatColor?' sel':''}" style="background:${cc}" onclick="ntPickColor('${cc}')"></div>`).join(''); }
 function ntAddCat(){
@@ -1705,7 +1747,7 @@ function ntEditMasterInline(type,id,el){
   el.contentEditable='true'; el.focus();
   const r=document.createRange(); r.selectNodeContents(el); window.getSelection().removeAllRanges(); window.getSelection().addRange(r);
   const save=()=>{el.contentEditable='false';const v=el.textContent.trim();if(v)item.text=v;if(type==='mid')ntSaveMid();else ntSaveLng();};
-  el.onblur=save; el.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();save();}if(e.key==='Escape')el.contentEditable='false';};
+  el.onblur=save; el.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();save();}if(e.key==='Escape')el.contentEditable='false';};
 }
 
 // ── WEEK CREATE ──
@@ -1806,7 +1848,7 @@ function ntRenderBoard(w){
         ${calH}
         <div id="ntev-inp-${w.id}-${di}" class="ntd-inp ntd-inp-event" style="display:none">
           <input type="text" placeholder="例: ランチ 12:00〜"
-            onkeydown="if(event.key==='Enter'&&!event.isComposing){event.preventDefault();ntCommitCallout('${w.id}',${di},this);}if(event.key==='Escape')ntHideInp('ntev-inp-${w.id}-${di}')">
+            onkeydown="if(event.key==='Enter'&&!event.isComposing){event.preventDefault();ntCommitCallout('${w.id}',${di},this);}if(event.key==='Escape')ntHideInp('ntev-inp-${w.id}-${di}')" oncompositionstart="this._c=true" oncompositionend="this._c=false">
         </div>
         <button class="ntd-add-event-btn" onclick="ntShowInp('ntev-inp-${w.id}-${di}')">＋ 予定を追加</button>
         ${(col.callouts||[]).length > 0 || (col.tasks||[]).length > 0 ? '<div class="ntd-tasks-divider"></div>' : ''}
@@ -1851,7 +1893,8 @@ function ntRenderThisWeek(w){
     const catBadge = t.cat ? `<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${c.color}18;color:${c.color};flex-shrink:0">${eh(c.name)}</span>` : '';
     return `<div class="ntd-tw-task${t.done?' done':''}" onclick="ntTwToggleTask('${w.id}','${t.id}')">
       <div class="ntd-tw-cb" onclick="event.stopPropagation();ntTwToggleTask('${w.id}','${t.id}')">${t.done?'✓':''}</div>
-      <span class="ntd-tw-text" title="${eh(t.text)}">${eh(t.text)}</span>
+      <span class="ntd-tw-text" title="${eh(t.text)}"
+        ondblclick="event.stopPropagation();ntTwEditTask('${w.id}','${t.id}',this)">${eh(t.text)}</span>
       ${catBadge}
       <button class="ntd-tw-del" onclick="event.stopPropagation();ntTwDelTask('${w.id}','${t.id}')">✕</button>
     </div>`;
@@ -1865,7 +1908,7 @@ function ntRenderThisWeek(w){
     <div class="ntd-tw-inp-wrap" id="tw-inp-wrap">
       <select class="ntd-tw-cat-sel" id="tw-cat-sel">${ntCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
       <input type="text" placeholder="今週中のタスクを追加..."
-        onkeydown="if(event.key==='Enter'){event.preventDefault();ntTwCommit('${w.id}',this);}if(event.key==='Escape')ntTwHideInp()">
+        onkeydown="if(event.key==='Enter'&&!event.isComposing){event.preventDefault();ntTwCommit('${w.id}',this);}if(event.key==='Escape')ntTwHideInp()" oncompositionstart="this._c=true" oncompositionend="this._c=false">
     </div>`;
 
   body.innerHTML = tasksHtml + addHtml;
@@ -2080,7 +2123,7 @@ async function ntEditCallout(wid,di,cid,el){
     }
   };
   lbl.onblur=save;
-  lbl.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();save();}if(e.key==='Escape')lbl.contentEditable='false';};
+  lbl.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();save();}if(e.key==='Escape')lbl.contentEditable='false';};
 }
 
 // ── 週ビュー表示時にカレンダーイベントを取得して反映 ──
@@ -2329,7 +2372,7 @@ function ntRenderRoutineGrid(){
       <div class="ntd-routine-tasks">${itemsHtml}</div>
       <div class="ntd-rt-add-row">
         <input type="text" placeholder="タスク名..." id="rt-inp-${di}"
-          onkeydown="if(event.key==='Enter'){event.preventDefault();ntAddRoutine(${di});}">
+          onkeydown="if(event.key==='Enter'&&!event.isComposing){event.preventDefault();ntAddRoutine(${di});}" oncompositionstart="this._c=true" oncompositionend="this._c=false">
         <select id="rt-cat-${di}">${catOpts}</select>
         <button onclick="ntAddRoutine(${di})">+</button>
       </div>
@@ -2792,6 +2835,39 @@ async function ntFetchHolidays(weekKey){
       localStorage.setItem('nt_holidays_cache', JSON.stringify(ntHolidays));
     }
   }catch(e){ console.warn('Holiday fetch failed:', e); }
+}
+
+
+// 今週中タスクのインライン編集
+function ntTwEditTask(wid, tid, el){
+  if(el.contentEditable === 'true') return;
+  const w = ntWeeks.find(x=>x.id===wid); if(!w) return;
+  const col = w.cols.find(c=>c.di===6); if(!col) return;
+  const t = col.tasks.find(x=>x.id===tid); if(!t) return;
+  el.contentEditable = 'true';
+  el.style.background = 'rgba(255,255,255,.8)';
+  el.style.outline = '1px solid var(--blue)';
+  el.style.borderRadius = '2px';
+  el.focus();
+  const rng = document.createRange();
+  rng.selectNodeContents(el);
+  rng.collapse(false);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(rng);
+  const save = () => {
+    el.contentEditable = 'false';
+    el.style.background = '';
+    el.style.outline = '';
+    const v = el.textContent.trim();
+    if(v) t.text = v;
+    else el.textContent = t.text;
+    ntSave();
+  };
+  el.onblur = save;
+  el.onkeydown = e => {
+    if(e.key === 'Enter' && !e.isComposing){ e.preventDefault(); save(); }
+    if(e.key === 'Escape'){ el.contentEditable='false'; el.style.background=''; el.style.outline=''; el.textContent=t.text; }
+  };
 }
 
 init();
