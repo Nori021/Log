@@ -505,7 +505,8 @@ tr:hover .ntd-del-btn{ opacity:1; }
 .ntd-ptask.pdone .ntd-ptask-cb{ background:var(--blue); border-color:var(--blue); color:#fff; }
 .ntd-ptask-body{ flex:1; min-width:0; }
 .ntd-ptask-top{ display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
-.ntd-ptask-label{ font-size:13px; line-height:1.5; color:var(--text); word-break:break-all; flex:1; min-width:0; }
+.ntd-ptask-label{ font-size:13px; line-height:1.5; color:var(--text); word-break:break-all; flex:1; min-width:0; cursor:text; border-radius:2px; }
+.ntd-ptask-label[contenteditable='true']{ background:var(--blue-bg); outline:1px solid var(--blue); padding:0 3px; cursor:text; }
 .ntd-ptask.pdone .ntd-ptask-label{ color:var(--text3); text-decoration:line-through; }
 .ntd-ptask-cat{ font-size:10px; font-weight:500; padding:1px 5px; border-radius:3px; white-space:nowrap; flex-shrink:0; }
 .ntd-ptask-del{ background:none; border:none; color:var(--text3); font-size:11px; cursor:pointer; opacity:0; padding:1px 3px; transition:opacity .1s; flex-shrink:0; margin-top:2px; }
@@ -998,7 +999,7 @@ tr.row-pending:hover td{ opacity:.85; }
             <table class="ntd-table" id="mid-table"><thead><tr><th style="width:20px"></th><th>タスク</th><th>カテゴリ</th><th style="width:30px"></th></tr></thead><tbody id="mid-tbody"></tbody></table>
             <div class="ntd-add-row">
               <span style="color:var(--text3);font-size:14px;padding:0 4px">+</span>
-              <input id="mid-inp" placeholder="タスクを追加..." onkeydown="if(event.key==='Enter')ntAddMaster('mid')">
+              <input id="mid-inp" placeholder="タスクを追加..." onkeydown="if(event.key==='Enter'&&!event.isComposing)ntAddMaster('mid')">
               <select id="mid-cat-sel" onchange=""></select>
               <button onclick="ntAddMaster('mid')">追加</button>
             </div>
@@ -1015,7 +1016,7 @@ tr.row-pending:hover td{ opacity:.85; }
             <table class="ntd-table" id="lng-table"><thead><tr><th style="width:20px"></th><th>やりたいこと</th><th>カテゴリ</th><th style="width:30px"></th></tr></thead><tbody id="lng-tbody"></tbody></table>
             <div class="ntd-add-row">
               <span style="color:var(--text3);font-size:14px;padding:0 4px">+</span>
-              <input id="lng-inp" placeholder="ウィッシュリストに追加..." onkeydown="if(event.key==='Enter')ntAddMaster('lng')">
+              <input id="lng-inp" placeholder="ウィッシュリストに追加..." onkeydown="if(event.key==='Enter'&&!event.isComposing)ntAddMaster('lng')">
               <select id="lng-cat-sel" onchange=""></select>
               <button onclick="ntAddMaster('lng')">追加</button>
             </div>
@@ -1098,7 +1099,7 @@ tr.row-pending:hover td{ opacity:.85; }
               <div class="ntd-sb-scroll" id="sb-mid-list"></div>
               <div class="ntd-sb-add">
                 <select id="sb-mid-cat"></select>
-                <input id="sb-mid-inp" placeholder="中期タスク追加..." onkeydown="if(event.key==='Enter')ntAddMaster('mid')">
+                <input id="sb-mid-inp" placeholder="中期タスク追加..." onkeydown="if(event.key==='Enter'&&!event.isComposing)ntAddMaster('mid')">
                 <button onclick="ntAddMaster('mid')">+</button>
               </div>
             </div>
@@ -1106,7 +1107,7 @@ tr.row-pending:hover td{ opacity:.85; }
               <div class="ntd-sb-scroll" id="sb-lng-list"></div>
               <div class="ntd-sb-add">
                 <select id="sb-lng-cat"></select>
-                <input id="sb-lng-inp" placeholder="ウィッシュリスト追加..." onkeydown="if(event.key==='Enter')ntAddMaster('lng')">
+                <input id="sb-lng-inp" placeholder="ウィッシュリスト追加..." onkeydown="if(event.key==='Enter'&&!event.isComposing)ntAddMaster('lng')">
                 <button onclick="ntAddMaster('lng')">+</button>
               </div>
             </div>
@@ -1773,7 +1774,7 @@ function ntRenderBoard(w){
         ${calH}
         <div id="ntev-inp-${w.id}-${di}" class="ntd-inp ntd-inp-event" style="display:none">
           <input type="text" placeholder="例: ランチ 12:00〜"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();ntCommitCallout('${w.id}',${di},this);}if(event.key==='Escape')ntHideInp('ntev-inp-${w.id}-${di}')">
+            onkeydown="if(event.key==='Enter'&&!event.isComposing){event.preventDefault();ntCommitCallout('${w.id}',${di},this);}if(event.key==='Escape')ntHideInp('ntev-inp-${w.id}-${di}')">
         </div>
         <button class="ntd-add-event-btn" onclick="ntShowInp('ntev-inp-${w.id}-${di}')">＋ 予定を追加</button>
         ${(col.callouts||[]).length > 0 || (col.tasks||[]).length > 0 ? '<div class="ntd-tasks-divider"></div>' : ''}
@@ -1781,7 +1782,8 @@ function ntRenderBoard(w){
         <div id="ntt-inp-${w.id}-${di}" class="ntd-inp" style="display:none">
           <select style="background:var(--bg2);border:1px solid var(--bd);border-radius:3px;font-family:var(--sans);font-size:11px;color:var(--text);padding:2px 4px;outline:none;cursor:pointer;flex-shrink:0" id="ntt-cat-${w.id}-${di}">${ntCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
           <input type="text" placeholder="タスクを追加..."
-            onkeydown="if(event.key==='Enter'){event.preventDefault();ntCommitTask('${w.id}',${di},this);}if(event.key==='Escape')ntHideInp('ntt-inp-${w.id}-${di}')">
+            onkeydown="ntTaskInputKey(event,'${w.id}',${di},this)"
+            oncompositionend="this._composing=false" oncompositionstart="this._composing=true">
         </div>
         <button class="ntd-add-task-btn" onclick="ntShowInp('ntt-inp-${w.id}-${di}')">+ タスクを追加</button>
       </div>`;
@@ -1883,13 +1885,14 @@ function ntTaskHTML(wid,di,t){
   const catBadge = t.cat ? `<span class="ntd-ptask-cat" style="background:${c.color}18;color:${c.color}">${eh(c.name)}</span>` : '';
   const carriedBadge = t.carriedFrom ? `<span style="font-size:9px;color:var(--text3);background:var(--bg3);padding:1px 5px;border-radius:3px;flex-shrink:0" title="${eh(t.carriedFrom)}から持ち越し">↩</span>` : '';
   const borderCol = t.cat ? ntCat(t.cat).color+'50' : 'transparent';
-  return `<div class="ntd-ptask${t.done?' pdone':''}${t.open?' open':''}" id="ntp-${t.id}" draggable="true"
-    ondragstart="ntDragStart(event,'${wid}',${di},'${t.id}')" ondragend="event.target.style.opacity=1">
-    <div class="ntd-ptask-row" style="border-left-color:${borderCol}">
+  return `<div class="ntd-ptask${t.done?' pdone':''}${t.open?' open':''}" id="ntp-${t.id}"
+    data-wid="${wid}" data-di="${di}" data-tid="${t.id}">
+    <div class="ntd-ptask-row" style="border-left-color:${borderCol}" draggable="true"
+      ondragstart="ntDragStart(event,'${wid}',${di},'${t.id}')" ondragend="ntDragEnd(event)">
       <div class="ntd-ptask-cb" onclick="event.stopPropagation();ntToggleTask('${wid}',${di},'${t.id}')">${t.done?'✓':''}</div>
       <div class="ntd-ptask-body">
         <div class="ntd-ptask-top">
-          <span class="ntd-ptask-label" ondblclick="ntEditTask('${wid}',${di},'${t.id}',this)">${eh(t.text)}</span>
+          <span class="ntd-ptask-label" ondblclick="event.stopPropagation();ntEditTask('${wid}',${di},'${t.id}',this)">${eh(t.text)}</span>
           ${carriedBadge}${catBadge}
         </div>
       </div>
@@ -1900,7 +1903,7 @@ function ntTaskHTML(wid,di,t){
     ${childH ? `<div class="ntd-children">${childH}
       <div id="ntch-inp-${t.id}" class="ntd-inp" style="display:none;margin:2px 0 2px 22px">
         <input type="text" placeholder="サブタスクを追加..."
-          onkeydown="if(event.key==='Enter'){event.preventDefault();ntCommitChild('${wid}',${di},'${t.id}',this);}if(event.key==='Escape')ntHideInp('ntch-inp-${t.id}')">
+          onkeydown="if(event.key==='Enter'&&!event.isComposing){event.preventDefault();ntCommitChild('${wid}',${di},'${t.id}',this);}if(event.key==='Escape')ntHideInp('ntch-inp-${t.id}')">
       </div>
     </div>` : ''}
   </div>`;
@@ -2128,11 +2131,53 @@ function ntToggleChild(wid,di,tid,cid){ const r=ntGetCol(wid,di);if(!r)return;co
 function ntToggleExpand(wid,di,tid){ const r=ntGetCol(wid,di);if(!r)return;const t=r.col.tasks.find(x=>x.id===tid);if(!t)return;t.open=!t.open;ntSave();ntRenderBoard(r.w); }
 function ntDelTask(wid,di,tid){ const r=ntGetCol(wid,di);if(!r)return;r.col.tasks=r.col.tasks.filter(x=>x.id!==tid);ntSave();ntRenderBoard(r.w); }
 function ntDelChild(wid,di,tid,cid){ const r=ntGetCol(wid,di);if(!r)return;const t=r.col.tasks.find(x=>x.id===tid);if(!t)return;t.children=t.children.filter(x=>x.id!==cid);ntSave();ntRenderBoard(r.w); }
-function ntEditTask(wid,di,tid,el){ const r=ntGetCol(wid,di);if(!r)return;const t=r.col.tasks.find(x=>x.id===tid);if(!t)return;el.contentEditable='true';el.focus();const rng=document.createRange();rng.selectNodeContents(el);window.getSelection().removeAllRanges();window.getSelection().addRange(rng);const save=()=>{el.contentEditable='false';const v=el.textContent.trim();if(v)t.text=v;ntSave();};el.onblur=save;el.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();save();}if(e.key==='Escape')el.contentEditable='false';}; }
+function ntEditTask(wid,di,tid,el){
+  // すでに編集中なら何もしない
+  if(el.contentEditable==='true') return;
+  const r=ntGetCol(wid,di); if(!r)return;
+  const t=r.col.tasks.find(x=>x.id===tid); if(!t)return;
+  // 編集中はドラッグ無効
+  const card=el.closest('[data-tid]');
+  if(card) card.removeAttribute('draggable');
+  el.contentEditable='true';
+  el.focus();
+  // カーソルを末尾に
+  const rng=document.createRange();
+  rng.selectNodeContents(el);
+  rng.collapse(false);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(rng);
+  const save=()=>{
+    el.contentEditable='false';
+    const v=el.textContent.trim();
+    if(v) t.text=v;
+    ntSave();
+    // ドラッグ再有効化
+    if(card) card.setAttribute('draggable','true');
+  };
+  el.onblur=save;
+  el.onkeydown=e=>{
+    if(e.key==='Enter'&&!e.isComposing){e.preventDefault();save();}
+    if(e.key==='Escape'){el.contentEditable='false';el.textContent=t.text;if(card)card.setAttribute('draggable','true');}
+  };
+}
 
 // ── DRAG & DROP ──
 let ntDrag=null;
-function ntDragStart(event,wid,di,tid){ ntDrag={wid,di,tid};event.target.style.opacity='.4';event.dataTransfer.effectAllowed='move'; }
+function ntDragStart(event,wid,di,tid){
+  // ラベルが編集中ならドラッグしない
+  const lbl = event.currentTarget.querySelector('.ntd-ptask-label');
+  if(lbl && lbl.contentEditable==='true'){ event.preventDefault(); return; }
+  ntDrag={wid,di,tid};
+  const card = event.currentTarget.closest('.ntd-ptask');
+  if(card) card.style.opacity='.4';
+  event.dataTransfer.effectAllowed='move';
+}
+function ntDragEnd(event){
+  const card = event.currentTarget.closest('.ntd-ptask');
+  if(card) card.style.opacity='1';
+  else event.target.style.opacity='1';
+}
 function ntDrop(event,wid,toDi){ event.preventDefault(); document.querySelectorAll('.ntd-col-body').forEach(el=>el.classList.remove('drag-over')); if(!ntDrag||ntDrag.wid!==wid)return; const{di:fromDi,tid}=ntDrag;if(fromDi===toDi)return; const w=ntWeeks.find(x=>x.id===wid);if(!w)return; const fc=w.cols.find(c=>c.di===fromDi);let tc=w.cols.find(c=>c.di===toDi);if(!tc){tc={di:toDi,callouts:[],tasks:[]};w.cols.push(tc);}if(!fc)return;const ti=fc.tasks.findIndex(t=>t.id===tid);if(ti<0)return;tc.tasks.push(fc.tasks.splice(ti,1)[0]);ntSave();ntRenderBoard(w);ntDrag=null;toast('📦 タスクを移動しました'); }
 
 // ── SIDEBAR LISTS ──
@@ -2590,6 +2635,17 @@ async function ntCommitSched(){
   }
 
   ntDismissSched();
+}
+
+
+// タスク入力のEnterキー処理（IME変換確定のEnterではカード化しない）
+function ntTaskInputKey(event, wid, di, inp){
+  if(event.key === 'Escape'){ ntHideInp(`ntt-inp-${wid}-${di}`); return; }
+  if(event.key !== 'Enter') return;
+  // isComposing: 変換中のEnter
+  if(event.isComposing || inp._composing){ inp._composing=false; return; }
+  event.preventDefault();
+  ntCommitTask(wid, di, inp);
 }
 
 init();
