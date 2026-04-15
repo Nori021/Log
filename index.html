@@ -260,7 +260,7 @@ mark{ background:rgba(223,171,1,.2); color:var(--orange); border-radius:2px; pad
    TODO PAGE — NOTION WHITE
 ══════════════════════════════════════ */
 #page-todo{ background:var(--bg); }
-.todo-page{ flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); min-height:0; height:100%; }
+.todo-page{ flex:1; display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden; background:var(--bg); scrollbar-width:thin; scrollbar-color:var(--bd) transparent; }
 
 /* ── Notion-style inner nav (breadcrumb area) ── */
 .nt-breadcrumb{ height:40px; flex-shrink:0; display:flex; align-items:center; padding:0 16px; gap:8px; border-bottom:1px solid var(--bd); background:var(--bg); }
@@ -339,8 +339,8 @@ tr:hover .ntd-del-btn{ opacity:1; }
 .ntd-new-card:hover{ background:var(--bg2); color:var(--text); }
 
 /* ── WEEK VIEW ── */
-.ntd-week-view{ flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); min-height:0; height:0; }
-.ntd-week-header{ padding:16px 20px 10px; flex-shrink:0; border-bottom:1px solid var(--bd); }
+.ntd-week-view{ flex:1; display:flex; flex-direction:column; background:var(--bg); min-height:0; }
+.ntd-week-header{ padding:16px 20px 10px; flex-shrink:0; }
 .ntd-wh-emoji{ font-size:24px; cursor:pointer; margin-bottom:4px; display:inline-block; padding:3px; border-radius:4px; transition:background .1s; line-height:1; }
 .ntd-wh-emoji:hover{ background:var(--bg3); }
 .ntd-wh-title{ font-size:20px; font-weight:700; color:var(--text); outline:none; border:none; background:transparent; font-family:var(--sans); width:100%; letter-spacing:-.3px; margin-bottom:2px; display:block; }
@@ -348,12 +348,12 @@ tr:hover .ntd-del-btn{ opacity:1; }
 .ntd-wh-meta{ font-size:12px; color:var(--text2); display:flex; align-items:center; gap:10px; }
 .ntd-wh-tpl-btn{ padding:3px 9px; border-radius:4px; border:1px solid var(--bd); background:transparent; color:var(--text2); font-size:12px; font-family:var(--sans); cursor:pointer; transition:all .1s; }
 .ntd-wh-tpl-btn:hover{ background:var(--bg2); border-color:var(--bd2); color:var(--text); }
-.ntd-main-area{ flex:1; display:flex; overflow:hidden; min-height:0; height:0; }
+.ntd-main-area{ flex:1; display:flex; min-height:0; align-items:flex-start; }
 
 /* 6-column board */
-.ntd-board{ flex:1; display:grid; grid-template-columns:repeat(6,1fr); overflow:hidden; border-top:1px solid var(--bd); min-height:0; height:100%; }
-.ntd-col{ display:flex; flex-direction:column; border-right:1px solid var(--bd); overflow:hidden; background:var(--bg); min-height:0; height:100%; }
-.ntd-col:last-child{ border-right:none; }
+.ntd-board{ flex:1; display:grid; grid-template-columns:repeat(6,1fr); align-items:start; }
+.ntd-col{ display:flex; flex-direction:column; background:var(--bg); }
+.ntd-col:last-child{ }
 
 /* ── 今週中パネル（ボード下部横断） ── */
 .ntd-thisweek-panel{
@@ -422,7 +422,7 @@ tr:hover .ntd-del-btn{ opacity:1; }
 .ntd-tw-cat-sel{ background:var(--bg2); border:1px solid var(--bd); border-radius:3px; font-family:var(--sans); font-size:11px; color:var(--text); padding:2px 4px; outline:none; cursor:pointer; flex-shrink:0; }
 
 /* col header */
-.ntd-col-hdr{ padding:8px 10px 7px; border-bottom:1px solid var(--bd); background:var(--bg); flex-shrink:0; user-select:none; }
+.ntd-col-hdr{ padding:8px 10px 6px; background:var(--bg); flex-shrink:0; user-select:none; border-bottom:none; }
 .ntd-col-day{ font-size:11px; font-weight:600; letter-spacing:.5px; text-transform:uppercase; color:var(--text2); margin-bottom:0; }
 .ntd-col-date{ display:inline-block; font-size:11px; font-weight:400; color:var(--text3); font-family:var(--mono); margin-left:4px; }
 .ntd-col.is-today .ntd-col-day{ color:var(--blue); }
@@ -432,8 +432,8 @@ tr:hover .ntd-del-btn{ opacity:1; }
 .ntd-col.is-fri .ntd-col-hdr{ background:#f5fbf8; }
 
 /* entire column content scrolls */
-.ntd-col-body{ flex:1; overflow-y:auto; overflow-x:hidden; padding:8px 8px 40px; scrollbar-width:thin; scrollbar-color:var(--bd) transparent; min-height:0; }
-.ntd-col-body::-webkit-scrollbar{width:3px} .ntd-col-body::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+.ntd-col-body{ padding:8px 8px 20px; }
+
 .ntd-col-body.drag-over{ background:var(--blue-bg); }
 
 /* callout / event block — 横並び: 時間(左) | タイトル(右) */
@@ -1069,8 +1069,8 @@ tr.row-pending:hover td{ opacity:.85; }
     </div>
 
     <!-- LAYER 1: WEEK VIEW -->
-    <div id="nt-week" style="display:none;width:100%;height:100%;flex-direction:column;overflow:hidden;min-height:0;flex:1">
-      <div class="ntd-week-view" style="display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0">
+    <div id="nt-week" style="display:none;width:100%;flex-direction:column;flex:1">
+      <div class="ntd-week-view" style="display:flex;flex-direction:column;flex:1">
         <div class="ntd-week-header">
           <div class="ntd-wh-emoji" id="wv-emoji" onclick="ntOpenIconPick(this,'wv-emoji-v')">🗓️</div>
           <input type="hidden" id="wv-emoji-v">
