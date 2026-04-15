@@ -487,29 +487,66 @@ tr:hover .ntd-del-btn{ opacity:1; }
 
 /* tasks — flat Notion-style checklist, no expand toggle */
 .ntd-tasks-divider{ height:1px; background:var(--bd); margin:4px 0 6px; }
-.ntd-ptask{ border-radius:3px; margin-bottom:0; }
-.ntd-ptask[draggable]{ cursor:grab; }
-.ntd-ptask[draggable]:active{ cursor:grabbing; opacity:.5; }
-.ntd-ptask-row{ display:flex; align-items:center; gap:4px; padding:2px 2px; border-radius:3px; transition:background .1s; }
-.ntd-ptask-row:hover{ background:var(--bg2); }
-/* hide the expand toggle — Notion uses flat list */
+.ntd-ptask{
+  border-radius:5px; margin-bottom:3px;
+  position:relative; overflow:hidden;
+  border:none;
+}
+.ntd-ptask-row{
+  display:flex; align-items:flex-start; gap:6px;
+  padding:6px 8px 6px 8px; border-radius:5px; transition:filter .1s;
+  background:var(--bg2); position:relative;
+}
+.ntd-ptask-row:hover{ filter:brightness(.97); }
+.ntd-ptask.pdone .ntd-ptask-row{ opacity:.65; }
+/* hide expand */
 .ntd-expand{ display:none; }
 .ntd-ptask-cb{
   width:15px; height:15px; border-radius:3px;
-  border:1.5px solid var(--bd2); flex-shrink:0; margin-top:2px;
+  border:1.5px solid rgba(0,0,0,.2); flex-shrink:0; margin-top:2px;
   display:flex; align-items:center; justify-content:center;
-  font-size:9px; transition:all .13s; cursor:pointer;
-  background:var(--bg);
+  font-size:9px; transition:all .13s; cursor:pointer; background:rgba(255,255,255,.5);
 }
-.ntd-ptask-cb:hover{ border-color:var(--blue); }
-.ntd-ptask.pdone .ntd-ptask-cb{ background:var(--blue); border-color:var(--blue); color:#fff; }
+.ntd-ptask-cb:hover{ border-color:rgba(0,0,0,.4); }
+.ntd-ptask.pdone .ntd-ptask-cb{ background:rgba(0,0,0,.2); border-color:rgba(0,0,0,.2); color:#fff; }
 .ntd-ptask-body{ flex:1; min-width:0; }
-.ntd-ptask-top{ display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
-.ntd-ptask-label{ font-size:13px; line-height:1.5; color:var(--text); word-break:break-all; flex:1; min-width:0; cursor:text; border-radius:2px; }
-.ntd-ptask-label[contenteditable='true']{ background:var(--blue-bg); outline:1px solid var(--blue); padding:0 3px; cursor:text; }
-.ntd-ptask.pdone .ntd-ptask-label{ color:var(--text3); text-decoration:line-through; }
-.ntd-ptask-cat{ font-size:10px; font-weight:500; padding:1px 5px; border-radius:3px; white-space:nowrap; flex-shrink:0; }
-/* del btn -> moved to ntd-ptask-actions */
+.ntd-ptask-top{ display:flex; align-items:flex-start; flex-direction:column; gap:3px; }
+.ntd-ptask-label{
+  font-size:12px; line-height:1.4; color:var(--text);
+  word-break:break-all; width:100%; cursor:text; border-radius:2px;
+}
+.ntd-ptask-label[contenteditable='true']{ background:rgba(255,255,255,.6); outline:1px solid rgba(0,0,0,.2); padding:0 3px; }
+.ntd-ptask.pdone .ntd-ptask-label{ text-decoration:line-through; }
+/* カテゴリバッジ：クリックで変更 */
+.ntd-ptask-cat{
+  font-size:10px; font-weight:700; padding:1px 6px; border-radius:3px;
+  white-space:nowrap; flex-shrink:0; cursor:pointer;
+  background:rgba(0,0,0,.12); color:rgba(0,0,0,.55);
+  transition:background .1s;
+}
+.ntd-ptask-cat:hover{ background:rgba(0,0,0,.2); }
+/* アクションボタン群：カテゴリバッジの下 */
+.ntd-ptask-actions{
+  display:flex; flex-direction:row; gap:2px; margin-top:2px; opacity:0; transition:opacity .1s;
+}
+.ntd-ptask-row:hover .ntd-ptask-actions{ opacity:1; }
+.ntd-ptask-sched, .ntd-ptask-carry{
+  background:rgba(0,0,0,.1); border:none; color:rgba(0,0,0,.5); font-size:9px;
+  cursor:pointer; padding:1px 5px; border-radius:3px;
+  white-space:nowrap; font-family:var(--sans); line-height:1.4;
+  transition:background .1s;
+}
+.ntd-ptask-sched:hover{ background:rgba(0,0,0,.2); }
+.ntd-ptask-carry:hover{ background:rgba(0,0,0,.2); }
+/* ✕ボタン：右上固定 */
+.ntd-ptask-del{
+  position:absolute; top:3px; right:3px;
+  background:none; border:none; color:rgba(0,0,0,.25); font-size:10px;
+  cursor:pointer; opacity:0; padding:1px 3px; border-radius:3px;
+  transition:opacity .1s, color .1s;
+}
+.ntd-ptask-row:hover .ntd-ptask-del{ opacity:1; }
+.ntd-ptask-del:hover{ color:var(--red); background:rgba(255,255,255,.5); }
 
 /* sub-tasks — indented, smaller */
 .ntd-children{ display:none; padding:1px 0 2px 22px; }
@@ -1429,12 +1466,11 @@ ntWeeks.forEach(w => {
 let ntMid   = JSON.parse(localStorage.getItem('nt_mid')   || '[]');
 let ntLng   = JSON.parse(localStorage.getItem('nt_lng')   || '[]');
 let ntCats  = JSON.parse(localStorage.getItem('nt_cats')  || 'null') || [
-  {id:'personal',  name:'個人',              color:'#9065b0'},
-  {id:'hotel',     name:'ホテル事業',        color:'#2383e2'},
-  {id:'laundry',   name:'ランドリー事業',    color:'#0f9f6e'},
-  {id:'stay',      name:'宿泊事業',          color:'#d9730d'},
-  {id:'sports',    name:'スポーツクラブ事業', color:'#eb5757'},
-  {id:'theday',    name:'THE DAY',           color:'#dfab01'},
+  {id:'personal',  name:'個人',    color:'#9065b0'},
+  {id:'aq',        name:'AQ',      color:'#2383e2'},
+  {id:'pp',        name:'PP',      color:'#0f9f6e'},
+  {id:'s283',      name:'283',     color:'#d9730d'},
+  {id:'theday',    name:'THE',     color:'#eb5757'},
 ];
 let ntCurWeekId = null;
 let ntNewCatColor = '#2383e2';
@@ -1880,31 +1916,35 @@ function ntTwDelTask(wid, tid){
 
 function ntTaskHTML(wid,di,t){
   const c=ntCat(t.cat||'');
+  const bgColor = t.cat ? c.color+'22' : 'var(--bg2)';
   const childH=(t.children||[]).map(ch=>`
     <div class="ntd-ctask${ch.done?' done':''}" onclick="ntToggleChild('${wid}',${di},'${t.id}','${ch.id}')">
       <div class="ntd-ctask-cb">${ch.done?'✓':''}</div>
       <div class="ntd-ctask-text">${eh(ch.text)}</div>
       <button class="ntd-ctask-del" onclick="event.stopPropagation();ntDelChild('${wid}',${di},'${t.id}','${ch.id}')">✕</button>
     </div>`).join('');
-  const catBadge = t.cat ? `<span class="ntd-ptask-cat" style="background:${c.color}18;color:${c.color}">${eh(c.name)}</span>` : '';
-  const carriedBadge = t.carriedFrom ? `<span style="font-size:9px;color:var(--text3);background:var(--bg3);padding:1px 5px;border-radius:3px;flex-shrink:0" title="${eh(t.carriedFrom)}から持ち越し">↩</span>` : '';
-  const borderCol = t.cat ? ntCat(t.cat).color+'50' : 'transparent';
+  // カテゴリバッジ：クリックでドロップダウン表示
+  const catBadge = `<span class="ntd-ptask-cat" onclick="event.stopPropagation();ntOpenCatPicker('${wid}',${di},'${t.id}',this)"
+    style="color:${t.cat?c.color:'#999'}">${t.cat?eh(c.name):'カテゴリ'}</span>`;
+  const carriedBadge = t.carriedFrom ? `<span style="font-size:9px;opacity:.6;padding:1px 4px;border-radius:3px;background:rgba(0,0,0,.1);flex-shrink:0">↩</span>` : '';
   return `<div class="ntd-ptask${t.done?' pdone':''}${t.open?' open':''}" id="ntp-${t.id}"
     data-wid="${wid}" data-di="${di}" data-tid="${t.id}">
-    <div class="ntd-ptask-row" style="border-left-color:${borderCol}" draggable="true"
+    <div class="ntd-ptask-row" style="background:${bgColor}" draggable="true"
       ondragstart="ntDragStart(event,'${wid}',${di},'${t.id}')" ondragend="ntDragEnd(event)">
       <div class="ntd-ptask-cb" onclick="event.stopPropagation();ntToggleTask('${wid}',${di},'${t.id}')">${t.done?'✓':''}</div>
       <div class="ntd-ptask-body">
         <div class="ntd-ptask-top">
           <span class="ntd-ptask-label" ondblclick="event.stopPropagation();ntEditTask('${wid}',${di},'${t.id}',this)">${eh(t.text)}</span>
-          ${carriedBadge}${catBadge}
+          <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+            ${catBadge}${carriedBadge}
+            <div class="ntd-ptask-actions">
+              <button class="ntd-ptask-sched" onclick="event.stopPropagation();ntOpenSched('${wid}',${di},'${t.id}')">📅 予定化</button>
+              <button class="ntd-ptask-carry" onclick="event.stopPropagation();ntCarryTask('${wid}',${di},'${t.id}')">→翌週</button>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="ntd-ptask-actions">
-        <button class="ntd-ptask-sched" title="スケジュールに追加" onclick="event.stopPropagation();ntOpenSched('${wid}',${di},'${t.id}')">📅</button>
-        <button class="ntd-ptask-carry" title="翌週へ" onclick="event.stopPropagation();ntCarryTask('${wid}',${di},'${t.id}')">→翌</button>
-        <button class="ntd-ptask-del" onclick="event.stopPropagation();ntDelTask('${wid}',${di},'${t.id}')">✕</button>
-      </div>
+      <button class="ntd-ptask-del" onclick="event.stopPropagation();ntDelTask('${wid}',${di},'${t.id}')">✕</button>
     </div>
     ${childH ? `<div class="ntd-children">${childH}
       <div id="ntch-inp-${t.id}" class="ntd-inp" style="display:none;margin:2px 0 2px 22px">
@@ -2652,6 +2692,71 @@ function ntTaskInputKey(event, wid, di, inp){
   if(event.isComposing || inp._composing){ inp._composing=false; return; }
   event.preventDefault();
   ntCommitTask(wid, di, inp);
+}
+
+
+// ── カテゴリピッカー（タスクカードのバッジクリックで表示） ──
+let _catPickerEl = null;
+
+function ntOpenCatPicker(wid, di, tid, badgeEl){
+  // 既存のピッカーを閉じる
+  const existing = document.getElementById('ntd-cat-picker-pop');
+  if(existing) existing.remove();
+  if(_catPickerEl === badgeEl){ _catPickerEl = null; return; }
+  _catPickerEl = badgeEl;
+
+  const r = ntGetCol(wid, di); if(!r) return;
+  const t = r.col.tasks.find(x=>x.id===tid); if(!t) return;
+
+  const pop = document.createElement('div');
+  pop.id = 'ntd-cat-picker-pop';
+  pop.style.cssText = `position:fixed;z-index:800;background:var(--bg);border:1px solid var(--bd2);
+    border-radius:8px;padding:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);min-width:120px;`;
+
+  pop.innerHTML = [
+    {id:'', name:'なし', color:'#999'},
+    ...ntCats
+  ].map(cat => `
+    <div onclick="ntSetTaskCat('${wid}',${di},'${tid}','${cat.id}')"
+      style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:5px;cursor:pointer;transition:background .1s;font-size:13px;"
+      onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
+      <span style="width:10px;height:10px;border-radius:50%;background:${cat.color};flex-shrink:0;display:inline-block"></span>
+      <span>${cat.id === (t.cat||'') ? '✓ ' : ''}${cat.name}</span>
+    </div>`
+  ).join('');
+
+  document.body.appendChild(pop);
+
+  // 位置を調整
+  const rect = badgeEl.getBoundingClientRect();
+  pop.style.top = (rect.bottom + 4) + 'px';
+  pop.style.left = rect.left + 'px';
+
+  // 画面外に出る場合は上に表示
+  setTimeout(()=>{
+    const pr = pop.getBoundingClientRect();
+    if(pr.bottom > window.innerHeight) pop.style.top = (rect.top - pr.height - 4) + 'px';
+    if(pr.right > window.innerWidth) pop.style.left = (rect.right - pr.width) + 'px';
+  }, 0);
+
+  // 外クリックで閉じる
+  setTimeout(()=>{
+    const close = e => {
+      if(!pop.contains(e.target)){ pop.remove(); _catPickerEl=null; document.removeEventListener('click', close); }
+    };
+    document.addEventListener('click', close);
+  }, 10);
+}
+
+function ntSetTaskCat(wid, di, tid, catId){
+  const existing = document.getElementById('ntd-cat-picker-pop');
+  if(existing) existing.remove();
+  _catPickerEl = null;
+  const r = ntGetCol(wid, di); if(!r) return;
+  const t = r.col.tasks.find(x=>x.id===tid); if(!t) return;
+  t.cat = catId || null;
+  ntSave();
+  ntRenderBoard(r.w);
 }
 
 init();
