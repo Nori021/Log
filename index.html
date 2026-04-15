@@ -47,9 +47,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
 /* ── PAGES ── */
-.pages{flex:1;overflow:hidden;position:relative}
-.page{position:absolute;inset:0;display:none}
-.page.on{display:flex}
+.pages{flex:1;overflow:hidden;position:relative;min-height:0}
+.page{position:absolute;inset:0;display:none;flex-direction:column}
+.page.on{display:flex;flex-direction:column}
 
 /* ══════════════════════════════════════
    LOG PAGE — NOTION WHITE
@@ -260,7 +260,7 @@ mark{ background:rgba(223,171,1,.2); color:var(--orange); border-radius:2px; pad
    TODO PAGE — NOTION WHITE
 ══════════════════════════════════════ */
 #page-todo{ background:var(--bg); }
-.todo-page{ flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); }
+.todo-page{ flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); min-height:0; height:100%; }
 
 /* ── Notion-style inner nav (breadcrumb area) ── */
 .nt-breadcrumb{ height:40px; flex-shrink:0; display:flex; align-items:center; padding:0 16px; gap:8px; border-bottom:1px solid var(--bd); background:var(--bg); }
@@ -339,7 +339,7 @@ tr:hover .ntd-del-btn{ opacity:1; }
 .ntd-new-card:hover{ background:var(--bg2); color:var(--text); }
 
 /* ── WEEK VIEW ── */
-.ntd-week-view{ flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); min-height:0; }
+.ntd-week-view{ flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); min-height:0; height:0; }
 .ntd-week-header{ padding:16px 20px 10px; flex-shrink:0; border-bottom:1px solid var(--bd); }
 .ntd-wh-emoji{ font-size:24px; cursor:pointer; margin-bottom:4px; display:inline-block; padding:3px; border-radius:4px; transition:background .1s; line-height:1; }
 .ntd-wh-emoji:hover{ background:var(--bg3); }
@@ -348,11 +348,11 @@ tr:hover .ntd-del-btn{ opacity:1; }
 .ntd-wh-meta{ font-size:12px; color:var(--text2); display:flex; align-items:center; gap:10px; }
 .ntd-wh-tpl-btn{ padding:3px 9px; border-radius:4px; border:1px solid var(--bd); background:transparent; color:var(--text2); font-size:12px; font-family:var(--sans); cursor:pointer; transition:all .1s; }
 .ntd-wh-tpl-btn:hover{ background:var(--bg2); border-color:var(--bd2); color:var(--text); }
-.ntd-main-area{ flex:1; display:flex; overflow:hidden; min-height:0; }
+.ntd-main-area{ flex:1; display:flex; overflow:hidden; min-height:0; height:0; }
 
 /* 6-column board */
-.ntd-board{ flex:1; display:grid; grid-template-columns:repeat(6,1fr); overflow:hidden; border-top:1px solid var(--bd); min-height:0; }
-.ntd-col{ display:flex; flex-direction:column; border-right:1px solid var(--bd); overflow:hidden; background:var(--bg); min-height:0; }
+.ntd-board{ flex:1; display:grid; grid-template-columns:repeat(6,1fr); overflow:hidden; border-top:1px solid var(--bd); min-height:0; height:100%; }
+.ntd-col{ display:flex; flex-direction:column; border-right:1px solid var(--bd); overflow:hidden; background:var(--bg); min-height:0; height:100%; }
 .ntd-col:last-child{ border-right:none; }
 
 /* ── 今週中パネル（ボード下部横断） ── */
@@ -432,7 +432,7 @@ tr:hover .ntd-del-btn{ opacity:1; }
 .ntd-col.is-fri .ntd-col-hdr{ background:#f5fbf8; }
 
 /* entire column content scrolls */
-.ntd-col-body{ flex:1; overflow-y:auto; padding:8px 8px 40px; scrollbar-width:thin; scrollbar-color:var(--bd) transparent; }
+.ntd-col-body{ flex:1; overflow-y:auto; overflow-x:hidden; padding:8px 8px 40px; scrollbar-width:thin; scrollbar-color:var(--bd) transparent; min-height:0; }
 .ntd-col-body::-webkit-scrollbar{width:3px} .ntd-col-body::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
 .ntd-col-body.drag-over{ background:var(--blue-bg); }
 
@@ -946,7 +946,7 @@ tr.row-pending:hover td{ opacity:.85; }
     </div>
 
     <!-- LAYER 0: DASHBOARD -->
-    <div id="nt-dash" style="display:flex;width:100%;height:100%;overflow:hidden">
+    <div id="nt-dash" style="display:flex;width:100%;height:100%;overflow:hidden;min-height:0;flex:1">
       <div class="ntd-dash">
         <div class="ntd-page-icon" id="dash-icon" onclick="ntOpenIconPick(this,'dash-icon-v')">🗓️</div>
         <input type="hidden" id="dash-icon-v" value="🗓️">
@@ -1039,7 +1039,7 @@ tr.row-pending:hover td{ opacity:.85; }
     </div>
 
     <!-- LAYER 0b: MASTER / CATEGORY SETTINGS -->
-    <div id="nt-master" style="display:none;width:100%;height:100%;overflow:hidden">
+    <div id="nt-master" style="display:none;width:100%;height:100%;overflow:hidden;min-height:0;flex:1">
       <div class="ntd-dash">
         <div class="ntd-page-title" style="font-size:22px;margin-bottom:4px">⚙️ カテゴリ管理</div>
         <div class="ntd-page-sub" style="margin-bottom:24px">事業・プロジェクト単位でタスクを色分けして管理できます</div>
@@ -1060,7 +1060,7 @@ tr.row-pending:hover td{ opacity:.85; }
 
 
     <!-- LAYER 0c: ROUTINE -->
-    <div id="nt-routine" style="display:none;width:100%;height:100%;overflow:hidden">
+    <div id="nt-routine" style="display:none;width:100%;height:100%;overflow:hidden;min-height:0;flex:1">
       <div class="ntd-dash">
         <div class="ntd-page-title" style="font-size:22px;margin-bottom:4px">🔄 ルーティン管理</div>
         <div class="ntd-page-sub" style="margin-bottom:20px">毎週自動で挿入されるタスクを曜日ごとに設定できます</div>
@@ -1069,8 +1069,8 @@ tr.row-pending:hover td{ opacity:.85; }
     </div>
 
     <!-- LAYER 1: WEEK VIEW -->
-    <div id="nt-week" style="display:none;width:100%;height:100%;flex-direction:column;overflow:hidden">
-      <div class="ntd-week-view" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+    <div id="nt-week" style="display:none;width:100%;height:100%;flex-direction:column;overflow:hidden;min-height:0;flex:1">
+      <div class="ntd-week-view" style="display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0">
         <div class="ntd-week-header">
           <div class="ntd-wh-emoji" id="wv-emoji" onclick="ntOpenIconPick(this,'wv-emoji-v')">🗓️</div>
           <input type="hidden" id="wv-emoji-v">
