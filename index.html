@@ -439,7 +439,7 @@ tr:hover .ntd-del-btn{ opacity:1; }
 /* callout / event block — 横並び: 時間(左) | タイトル(右) */
 .ntd-callout{
   display:flex; flex-direction:row; align-items:stretch; gap:0;
-  padding:0; border-radius:4px; margin-bottom:3px;
+  padding:0; border-radius:3px; margin-bottom:2px;
   cursor:pointer; position:relative;
   border:none; min-width:0; width:100%;
   transition:filter .1s;
@@ -457,13 +457,13 @@ tr:hover .ntd-del-btn{ opacity:1; }
 /* 時間（左側）: コンパクト */
 .ntd-callout-time{
   font-family:var(--mono); font-size:9px; font-weight:700;
-  padding:4px 4px; display:flex; align-items:center; justify-content:center;
-  flex-shrink:0; white-space:nowrap; letter-spacing:0; line-height:1.3; text-align:center;
+  padding:3px 4px; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; white-space:nowrap; letter-spacing:0; line-height:1.2; text-align:center;
   min-width:0;
 }
-/* タイトル（右側）: 長ければ2行に折り返して全部表示 */
+/* タイトル（右側） */
 .ntd-callout-text{
-  font-size:11px; line-height:1.4; padding:4px 5px;
+  font-size:11px; line-height:1.3; padding:3px 5px;
   flex:1; min-width:0;
   white-space:normal !important;
   word-break:break-all;
@@ -476,25 +476,24 @@ tr:hover .ntd-del-btn{ opacity:1; }
 }
 .ntd-callout-del{
   background:none; border:none; color:rgba(0,0,0,.25); font-size:9px;
-  cursor:pointer; opacity:0; padding:3px 4px; flex-shrink:0;
+  cursor:pointer; opacity:0; padding:2px 4px; flex-shrink:0;
   display:flex; align-items:flex-start; transition:opacity .1s;
 }
 .ntd-callout:hover .ntd-callout-del{ opacity:1; }
 .ntd-callout-del:hover{ color:var(--red); background:rgba(255,255,255,.5); }
 
-.ntd-add-event-btn{ display:flex; align-items:center; gap:4px; padding:3px 2px; cursor:pointer; color:var(--text3); font-size:12px; font-family:var(--sans); transition:color .1s; border:none; background:transparent; width:100%; margin-bottom:6px; }
+.ntd-add-event-btn{ display:flex; align-items:center; gap:4px; padding:2px 2px; cursor:pointer; color:var(--text3); font-size:11px; font-family:var(--sans); transition:color .1s; border:none; background:transparent; width:100%; margin-bottom:4px; }
 .ntd-add-event-btn:hover{ color:var(--text2); }
 
-/* tasks — flat Notion-style checklist, no expand toggle */
-.ntd-tasks-divider{ height:1px; background:var(--bd); margin:4px 0 6px; }
+/* tasks — flat Notion-style checklist */
+.ntd-tasks-divider{ height:1px; background:var(--bd); margin:3px 0 4px; }
 .ntd-ptask{
-  border-radius:5px; margin-bottom:3px;
-  position:relative; overflow:hidden;
-  border:none;
+  border-radius:4px; margin-bottom:2px;
+  position:relative; overflow:hidden; border:none;
 }
 .ntd-ptask-row{
-  display:flex; align-items:flex-start; gap:6px;
-  padding:6px 8px 6px 8px; border-radius:5px; transition:filter .1s;
+  display:flex; align-items:center; gap:5px;
+  padding:3px 6px; border-radius:4px; transition:filter .1s;
   background:var(--bg2); position:relative;
 }
 .ntd-ptask-row:hover{ filter:brightness(.97); }
@@ -502,46 +501,44 @@ tr:hover .ntd-del-btn{ opacity:1; }
 /* hide expand */
 .ntd-expand{ display:none; }
 .ntd-ptask-cb{
-  width:15px; height:15px; border-radius:3px;
-  border:1.5px solid rgba(0,0,0,.2); flex-shrink:0; margin-top:2px;
+  width:13px; height:13px; border-radius:3px;
+  border:1.5px solid rgba(0,0,0,.2); flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
-  font-size:9px; transition:all .13s; cursor:pointer; background:rgba(255,255,255,.5);
+  font-size:8px; transition:all .13s; cursor:pointer; background:rgba(255,255,255,.5);
 }
 .ntd-ptask-cb:hover{ border-color:rgba(0,0,0,.4); }
 .ntd-ptask.pdone .ntd-ptask-cb{ background:rgba(0,0,0,.2); border-color:rgba(0,0,0,.2); color:#fff; }
 .ntd-ptask-body{ flex:1; min-width:0; }
-.ntd-ptask-top{ display:flex; align-items:flex-start; flex-direction:column; gap:3px; }
+.ntd-ptask-top{ display:flex; align-items:center; flex-direction:column; gap:1px; }
 .ntd-ptask-label{
-  font-size:12px; line-height:1.4; color:var(--text);
+  font-size:12px; line-height:1.3; color:var(--text);
   word-break:break-all; width:100%; cursor:text; border-radius:2px;
 }
 .ntd-ptask-label[contenteditable='true']{ background:rgba(255,255,255,.6); outline:1px solid rgba(0,0,0,.2); padding:0 3px; }
 .ntd-ptask.pdone .ntd-ptask-label{ text-decoration:line-through; }
-/* カテゴリバッジ：クリックで変更 */
+/* カテゴリバッジ＋アクション行：横並び */
+.ntd-ptask-meta{
+  display:flex; align-items:center; gap:3px; flex-wrap:wrap;
+  opacity:0; transition:opacity .1s; height:0; overflow:hidden;
+  transition:opacity .1s, height .1s;
+}
+.ntd-ptask-row:hover .ntd-ptask-meta{ opacity:1; height:auto; }
 .ntd-ptask-cat{
-  font-size:10px; font-weight:700; padding:1px 6px; border-radius:3px;
-  white-space:nowrap; flex-shrink:0; cursor:pointer;
-  background:rgba(0,0,0,.12); color:rgba(0,0,0,.55);
-  transition:background .1s;
+  font-size:9px; font-weight:700; padding:0px 5px; border-radius:3px;
+  white-space:nowrap; flex-shrink:0; cursor:pointer; line-height:1.6;
+  background:rgba(0,0,0,.12); color:rgba(0,0,0,.55); transition:background .1s;
 }
 .ntd-ptask-cat:hover{ background:rgba(0,0,0,.2); }
-/* アクションボタン群：カテゴリバッジの下 */
-.ntd-ptask-actions{
-  display:flex; flex-direction:row; gap:2px; margin-top:2px; opacity:0; transition:opacity .1s;
-}
-.ntd-ptask-row:hover .ntd-ptask-actions{ opacity:1; }
 .ntd-ptask-sched, .ntd-ptask-carry{
-  background:rgba(0,0,0,.1); border:none; color:rgba(0,0,0,.5); font-size:9px;
-  cursor:pointer; padding:1px 5px; border-radius:3px;
-  white-space:nowrap; font-family:var(--sans); line-height:1.4;
-  transition:background .1s;
+  background:rgba(0,0,0,.08); border:none; color:rgba(0,0,0,.45); font-size:9px;
+  cursor:pointer; padding:0px 5px; border-radius:3px; line-height:1.6;
+  white-space:nowrap; font-family:var(--sans); transition:background .1s;
 }
-.ntd-ptask-sched:hover{ background:rgba(0,0,0,.2); }
-.ntd-ptask-carry:hover{ background:rgba(0,0,0,.2); }
+.ntd-ptask-sched:hover, .ntd-ptask-carry:hover{ background:rgba(0,0,0,.18); }
 /* ✕ボタン：右上固定 */
 .ntd-ptask-del{
-  position:absolute; top:3px; right:3px;
-  background:none; border:none; color:rgba(0,0,0,.25); font-size:10px;
+  position:absolute; top:2px; right:2px;
+  background:none; border:none; color:rgba(0,0,0,.2); font-size:10px;
   cursor:pointer; opacity:0; padding:1px 3px; border-radius:3px;
   transition:opacity .1s, color .1s;
 }
@@ -1928,7 +1925,7 @@ function ntTaskHTML(wid,di,t){
   // カテゴリバッジ：クリックでドロップダウン表示
   const catBadge = `<span class="ntd-ptask-cat" onclick="event.stopPropagation();ntOpenCatPicker('${wid}',${di},'${t.id}',this)"
     style="color:${t.cat?c.color:'#999'}">${t.cat?eh(c.name):'カテゴリ'}</span>`;
-  const carriedBadge = t.carriedFrom ? `<span style="font-size:9px;opacity:.6;padding:1px 4px;border-radius:3px;background:rgba(0,0,0,.1);flex-shrink:0">↩</span>` : '';
+  const carriedBadge = t.carriedFrom ? `<span style="font-size:9px;opacity:.6;padding:0 4px;border-radius:3px;background:rgba(0,0,0,.1);flex-shrink:0">↩</span>` : '';
   return `<div class="ntd-ptask${t.done?' pdone':''}${t.open?' open':''}" id="ntp-${t.id}"
     data-wid="${wid}" data-di="${di}" data-tid="${t.id}">
     <div class="ntd-ptask-row" style="background:${bgColor}" draggable="true"
@@ -1937,12 +1934,10 @@ function ntTaskHTML(wid,di,t){
       <div class="ntd-ptask-body">
         <div class="ntd-ptask-top">
           <span class="ntd-ptask-label" ondblclick="event.stopPropagation();ntEditTask('${wid}',${di},'${t.id}',this)">${eh(t.text)}</span>
-          <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+          <div class="ntd-ptask-meta">
             ${catBadge}${carriedBadge}
-            <div class="ntd-ptask-actions">
-              <button class="ntd-ptask-sched" onclick="event.stopPropagation();ntOpenSched('${wid}',${di},'${t.id}')">📅 予定化</button>
-              <button class="ntd-ptask-carry" onclick="event.stopPropagation();ntCarryTask('${wid}',${di},'${t.id}')">→翌週</button>
-            </div>
+            <button class="ntd-ptask-sched" onclick="event.stopPropagation();ntOpenSched('${wid}',${di},'${t.id}')">📅 予定化</button>
+            <button class="ntd-ptask-carry" onclick="event.stopPropagation();ntCarryTask('${wid}',${di},'${t.id}')">→翌週</button>
           </div>
         </div>
       </div>
