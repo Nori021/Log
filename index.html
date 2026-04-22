@@ -1173,7 +1173,7 @@ tr.row-pending:hover td{ opacity:.85; }
         <div class="ntd-thisweek-panel" id="tw-panel">
           <div class="ntd-tw-header" onclick="ntTwToggle()">
             <span class="ntd-tw-icon">🗂</span>
-            <span class="ntd-tw-title">今週中にやること</span>
+            <span class="ntd-tw-title">保留タスク</span>
             <span class="ntd-tw-count" id="tw-count">0件</span>
             <span class="ntd-tw-chevron" id="tw-chevron">▼</span>
           </div>
@@ -1718,12 +1718,26 @@ function ntRenderMasterTable(type){
         </td></tr>`;
         lastCat = item.cat;
       }
+      const hasMemoMid = !!(item.memo && item.memo.trim());
       html += `<tr class="${rowCls}">
         <td><div class="ntd-cb${st==='done'?' done':''}" onclick="ntToggleMaster('${type}','${item.id}')">${st==='done'?'✓':''}</div></td>
-        <td><span class="ntd-task-text${st==='done'?' done':''}" ondblclick="ntEditMasterInline('${type}','${item.id}',this)">${eh(item.text)}</span></td>
+        <td>
+          <span class="ntd-task-text${st==='done'?' done':''}" ondblclick="ntEditMasterInline('${type}','${item.id}',this)">${eh(item.text)}</span>
+          ${hasMemoMid ? `<span style="font-size:9px;background:rgba(0,0,0,.08);padding:0 4px;border-radius:3px;cursor:pointer;margin-left:4px" onclick="ntToggleMasterMemo('${type}','${item.id}')" title="メモあり">📝</span>` : ''}
+        </td>
         <td><span class="ntd-cat-badge" style="background:${cat.color}18;color:${cat.color}">${eh(cat.name)}</span></td>
         <td><span class="ntd-status-badge ${STATUS_CLASS[st]||'st-doing'}" onclick="ntCycleStatus('${item.id}')" title="クリックでステータス変更">${STATUS_LABELS[st]||'進行中'}</span></td>
-        <td><button class="ntd-del-btn" onclick="ntDelMaster('${type}','${item.id}')">✕</button></td>
+        <td>
+          <button class="ntd-ptask-memo-btn" style="font-size:9px;margin-right:4px" onclick="ntToggleMasterMemo('${type}','${item.id}')">${hasMemoMid?'📝':'＋ メモ'}</button>
+          <button class="ntd-del-btn" onclick="ntDelMaster('${type}','${item.id}')">✕</button>
+        </td>
+      </tr>
+      <tr id="master-memo-${item.id}" style="display:none">
+        <td colspan="5" style="padding:2px 8px 6px 32px">
+          <textarea class="ntd-ptask-memo-ta" placeholder="メモを入力..."
+            oninput="ntSaveMasterMemo('${type}','${item.id}',this.value)"
+          >${eh(item.memo||'')}</textarea>
+        </td>
       </tr>`;
     });
     tb.innerHTML = html;
@@ -1742,11 +1756,25 @@ function ntRenderMasterTable(type){
         </td></tr>`;
         lastCat = item.cat;
       }
+      const hasMemoLng = !!(item.memo && item.memo.trim());
       html += `<tr>
         <td><div class="ntd-cb${item.done?' done':''}" onclick="ntToggleMaster('${type}','${item.id}')">${item.done?'✓':''}</div></td>
-        <td><span class="ntd-task-text${item.done?' done':''}" ondblclick="ntEditMasterInline('${type}','${item.id}',this)">${eh(item.text)}</span></td>
+        <td>
+          <span class="ntd-task-text${item.done?' done':''}" ondblclick="ntEditMasterInline('${type}','${item.id}',this)">${eh(item.text)}</span>
+          ${hasMemoLng ? `<span style="font-size:9px;background:rgba(0,0,0,.08);padding:0 4px;border-radius:3px;cursor:pointer;margin-left:4px" onclick="ntToggleMasterMemo('${type}','${item.id}')" title="メモあり">📝</span>` : ''}
+        </td>
         <td><span class="ntd-cat-badge" style="background:${cat.color}18;color:${cat.color}">${eh(cat.name)}</span></td>
-        <td><button class="ntd-del-btn" onclick="ntDelMaster('${type}','${item.id}')">✕</button></td>
+        <td>
+          <button class="ntd-ptask-memo-btn" style="font-size:9px;margin-right:4px" onclick="ntToggleMasterMemo('${type}','${item.id}')">${hasMemoLng?'📝':'＋ メモ'}</button>
+          <button class="ntd-del-btn" onclick="ntDelMaster('${type}','${item.id}')">✕</button>
+        </td>
+      </tr>
+      <tr id="master-memo-${item.id}" style="display:none">
+        <td colspan="4" style="padding:2px 8px 6px 32px">
+          <textarea class="ntd-ptask-memo-ta" placeholder="メモを入力..."
+            oninput="ntSaveMasterMemo('${type}','${item.id}',this.value)"
+          >${eh(item.memo||'')}</textarea>
+        </td>
       </tr>`;
     });
     tb.innerHTML = html;
@@ -1921,12 +1949,23 @@ function ntRenderThisWeek(w){
   const tasksHtml = tasks.map(t=>{
     const c = ntCat(t.cat||'');
     const catBadge = t.cat ? `<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${c.color}18;color:${c.color};flex-shrink:0">${eh(c.name)}</span>` : '';
-    return `<div class="ntd-tw-task${t.done?' done':''}" onclick="ntTwToggleTask('${w.id}','${t.id}')">
-      <div class="ntd-tw-cb" onclick="event.stopPropagation();ntTwToggleTask('${w.id}','${t.id}')">${t.done?'✓':''}</div>
-      <span class="ntd-tw-text" title="${eh(t.text)}"
-        ondblclick="event.stopPropagation();ntTwEditTask('${w.id}','${t.id}',this)">${eh(t.text)}</span>
-      ${catBadge}
-      <button class="ntd-tw-del" onclick="event.stopPropagation();ntTwDelTask('${w.id}','${t.id}')">✕</button>
+    const hasMemo = !!(t.memo && t.memo.trim());
+    return `<div class="ntd-tw-task-wrap" id="ntw-${t.id}">
+      <div class="ntd-tw-task${t.done?' done':''}" onclick="ntTwToggleTask('${w.id}','${t.id}')">
+        <div class="ntd-tw-cb" onclick="event.stopPropagation();ntTwToggleTask('${w.id}','${t.id}')">${t.done?'✓':''}</div>
+        <span class="ntd-tw-text" title="${eh(t.text)}"
+          ondblclick="event.stopPropagation();ntTwEditTask('${w.id}','${t.id}',this)">${eh(t.text)}</span>
+        ${catBadge}
+        ${hasMemo ? `<span style="font-size:9px;background:rgba(0,0,0,.1);padding:0 4px;border-radius:3px;cursor:pointer" onclick="event.stopPropagation();ntTwToggleMemo('${t.id}')" title="メモあり">📝</span>` : ''}
+        <button class="ntd-ptask-memo-btn" style="font-size:9px" onclick="event.stopPropagation();ntTwToggleMemo('${t.id}')">${hasMemo?'📝 メモ':'＋ メモ'}</button>
+        <button class="ntd-tw-del" onclick="event.stopPropagation();ntTwDelTask('${w.id}','${t.id}')">✕</button>
+      </div>
+      <div class="ntd-ptask-memo-panel" id="ntw-memo-${t.id}">
+        <textarea class="ntd-ptask-memo-ta" placeholder="メモを入力..."
+          oninput="ntTwSaveMemo('${w.id}','${t.id}',this.value)"
+          onclick="event.stopPropagation()"
+        >${eh(t.memo||'')}</textarea>
+      </div>
     </div>`;
   }).join('');
 
@@ -1937,7 +1976,7 @@ function ntRenderThisWeek(w){
     </div>
     <div class="ntd-tw-inp-wrap" id="tw-inp-wrap">
       <select class="ntd-tw-cat-sel" id="tw-cat-sel">${ntCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
-      <input type="text" placeholder="今週中のタスクを追加..."
+      <input type="text" placeholder="保留タスクを追加..."
         onkeydown="if(event.key==='Enter'&&!event.isComposing){event.preventDefault();ntTwCommit('${w.id}',this);}if(event.key==='Escape')ntTwHideInp()" oncompositionstart="this._c=true" oncompositionend="this._c=false">
     </div>`;
 
@@ -2952,6 +2991,40 @@ function ntSaveMemo(wid, di, tid, val){
   // メモボタンのテキスト更新
   const btn = meta.querySelector('.ntd-ptask-memo-btn');
   if(btn) btn.textContent = hasMemo ? '📝 メモ' : '＋ メモ';
+}
+
+
+// ── 保留タスクのメモ ──
+function ntTwToggleMemo(tid){
+  const panel = document.getElementById('ntw-memo-'+tid);
+  if(!panel) return;
+  const isOpen = panel.style.display === 'block';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if(!isOpen){ const ta=panel.querySelector('textarea'); if(ta) setTimeout(()=>ta.focus(),50); }
+}
+function ntTwSaveMemo(wid, tid, val){
+  const w = ntWeeks.find(x=>x.id===wid); if(!w) return;
+  const col = w.cols.find(c=>c.di===6); if(!col) return;
+  const t = col.tasks.find(x=>x.id===tid); if(!t) return;
+  t.memo = val; ntSave();
+}
+
+// ── 中長期タスクのメモ ──
+function ntToggleMasterMemo(type, id){
+  const row = document.getElementById('master-memo-'+id);
+  if(!row) return;
+  const isOpen = row.style.display !== 'none';
+  row.style.display = isOpen ? 'none' : 'table-row';
+  if(!isOpen){ const ta=row.querySelector('textarea'); if(ta) setTimeout(()=>ta.focus(),50); }
+}
+function ntSaveMasterMemo(type, id, val){
+  const arr = type==='mid' ? ntMid : ntLng;
+  const item = arr.find(x=>x.id===id); if(!item) return;
+  item.memo = val;
+  if(type==='mid') ntSaveMid(); else ntSaveLng();
+  // バッジ更新
+  const badge = document.querySelector(`[onclick="ntToggleMasterMemo('${type}','${id}')"]`);
+  if(badge && badge.tagName === 'BUTTON') badge.textContent = (val&&val.trim()) ? '📝' : '＋ メモ';
 }
 
 init();
