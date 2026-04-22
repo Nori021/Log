@@ -854,6 +854,30 @@ tr.row-pending:hover td{ opacity:.85; }
 .ntd-ptask-row:hover .ntd-ptask-sched,
 .ntd-ptask-row:hover .ntd-ptask-carry,
 .ntd-ptask-row:hover .ntd-ptask-del{ opacity:1; }
+
+/* ── タスクメモ ── */
+.ntd-ptask-memo-badge{
+  font-size:8px; padding:0 4px; border-radius:3px;
+  background:rgba(0,0,0,.12); color:rgba(0,0,0,.45);
+  flex-shrink:0; line-height:1.6; cursor:pointer;
+  transition:background .1s;
+}
+.ntd-ptask-memo-badge:hover{ background:rgba(0,0,0,.2); }
+.ntd-ptask-memo-panel{
+  display:none; padding:5px 8px 6px 28px;
+  background:rgba(0,0,0,.04); border-top:1px solid rgba(0,0,0,.07);
+}
+.ntd-ptask.memo-open .ntd-ptask-memo-panel{ display:block; }
+.ntd-ptask-memo-ta{
+  width:100%; background:rgba(255,255,255,.7);
+  border:1px solid rgba(0,0,0,.12); border-radius:4px;
+  font-family:var(--sans); font-size:11px; color:var(--text);
+  padding:5px 7px; outline:none; resize:vertical; min-height:48px;
+  line-height:1.5; transition:border-color .1s;
+  box-sizing:border-box;
+}
+.ntd-ptask-memo-ta:focus{ border-color:rgba(0,0,0,.3); background:#fff; }
+.ntd-ptask-memo-ta::placeholder{ color:rgba(0,0,0,.3); }
 </style>
 </head>
 <body>
@@ -1958,10 +1982,13 @@ function ntTaskHTML(wid,di,t){
       <div class="ntd-ctask-text">${eh(ch.text)}</div>
       <button class="ntd-ctask-del" onclick="event.stopPropagation();ntDelChild('${wid}',${di},'${t.id}','${ch.id}')">✕</button>
     </div>`).join('');
-  // カテゴリバッジ：クリックでドロップダウン表示
   const catBadge = `<span class="ntd-ptask-cat" onclick="event.stopPropagation();ntOpenCatPicker('${wid}',${di},'${t.id}',this)"
     style="color:${t.cat?c.color:'#999'}">${t.cat?eh(c.name):'カテゴリ'}</span>`;
   const carriedBadge = t.carriedFrom ? `<span style="font-size:9px;opacity:.6;padding:0 4px;border-radius:3px;background:rgba(0,0,0,.1);flex-shrink:0">↩</span>` : '';
+  const hasMemo = !!(t.memo && t.memo.trim());
+  const memoBadge = hasMemo
+    ? `<span class="ntd-ptask-memo-badge" onclick="event.stopPropagation();ntToggleMemo('${t.id}')" title="メモあり">📝</span>`
+    : '';
   return `<div class="ntd-ptask${t.done?' pdone':''}${t.open?' open':''}" id="ntp-${t.id}"
     data-wid="${wid}" data-di="${di}" data-tid="${t.id}">
     <div class="ntd-ptask-row" style="background:${bgColor}" draggable="true"
@@ -1971,13 +1998,19 @@ function ntTaskHTML(wid,di,t){
         <div class="ntd-ptask-top">
           <span class="ntd-ptask-label" ondblclick="event.stopPropagation();ntEditTask('${wid}',${di},'${t.id}',this)">${eh(t.text)}</span>
           <div class="ntd-ptask-meta">
-            ${catBadge}${carriedBadge}
+            ${catBadge}${carriedBadge}${memoBadge}
             <button class="ntd-ptask-sched" onclick="event.stopPropagation();ntOpenSched('${wid}',${di},'${t.id}')">📅 予定化</button>
             <button class="ntd-ptask-carry" onclick="event.stopPropagation();ntCarryTask('${wid}',${di},'${t.id}')">→翌週</button>
           </div>
         </div>
       </div>
       <button class="ntd-ptask-del" onclick="event.stopPropagation();ntDelTask('${wid}',${di},'${t.id}')">✕</button>
+    </div>
+    <div class="ntd-ptask-memo-panel">
+      <textarea class="ntd-ptask-memo-ta" placeholder="メモを入力..."
+        oninput="ntSaveMemo('${wid}',${di},'${t.id}',this.value)"
+        onclick="event.stopPropagation()"
+      >${eh(t.memo||'')}</textarea>
     </div>
     ${childH ? `<div class="ntd-children">${childH}
       <div id="ntch-inp-${t.id}" class="ntd-inp" style="display:none;margin:2px 0 2px 22px">
@@ -2868,6 +2901,46 @@ function ntTwEditTask(wid, tid, el){
     if(e.key === 'Enter' && !e.isComposing){ e.preventDefault(); save(); }
     if(e.key === 'Escape'){ el.contentEditable='false'; el.style.background=''; el.style.outline=''; el.textContent=t.text; }
   };
+}
+
+
+// ── タスクメモ ──
+function ntToggleMemo(tid){
+  const card = document.getElementById('ntp-'+tid);
+  if(!card) return;
+  const isOpen = card.classList.toggle('memo-open');
+  if(isOpen){
+    const ta = card.querySelector('.ntd-ptask-memo-ta');
+    if(ta) setTimeout(()=>ta.focus(), 50);
+  }
+}
+
+function ntSaveMemo(wid, di, tid, val){
+  const w = ntWeeks.find(x=>x.id===wid); if(!w) return;
+  const col = w.cols.find(c=>c.di===di); if(!col) return;
+  const t = col.tasks.find(x=>x.id===tid); if(!t) return;
+  t.memo = val;
+  ntSave();
+  // バッジの表示を即時更新
+  const card = document.getElementById('ntp-'+tid);
+  if(!card) return;
+  const row = card.querySelector('.ntd-ptask-row');
+  if(!row) return;
+  const existing = row.querySelector('.ntd-ptask-memo-badge');
+  const meta = row.querySelector('.ntd-ptask-meta');
+  if(!meta) return;
+  if(val.trim() && !existing){
+    const badge = document.createElement('span');
+    badge.className = 'ntd-ptask-memo-badge';
+    badge.textContent = '📝';
+    badge.title = 'メモあり';
+    badge.onclick = e => { e.stopPropagation(); ntToggleMemo(tid); };
+    // catBadgeの次に挿入
+    const carry = meta.querySelector('.ntd-ptask-carry');
+    meta.insertBefore(badge, carry || null);
+  } else if(!val.trim() && existing){
+    existing.remove();
+  }
 }
 
 init();
